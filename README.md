@@ -1,2 +1,2 @@
 # wireless_communication_system
-Pure ALOHA is assigned as the MAC protocol
+Slotted ALOHA is assigned as the MAC protocol, while 64FSK is used to do the modulation.
