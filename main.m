@@ -10,10 +10,9 @@ xlabel('Traffic(Simulation result)')
 ylabel('Throughput')
 legend('result without capture effect', 'theory capture effect', 'result with capture effect')
 
-figure(1)
+figure
 plot(Traffic1, Delay1, ':bo', Traffic2, Delay2, '--g>')
 tittle('Average Delay time of Slotted ALOHA system')
 xlabel('Traffic(Simulation result)')
 ylabel('Average Delay time(Packet)')
 legend('result without capture effect', 'result with capture effect')
-figure(2)

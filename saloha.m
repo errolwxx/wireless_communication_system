@@ -63,68 +63,40 @@ for indx = 1 :length(G)
     mtime = (fix(mgtime/slot)+1)*slot;                                      % sending time
     Mstate = zeros(1,Mnum);                                                 % terminal state
     Mplen(1:Mnum) = Plen;                                                   % packet length
-    next_time     = min(mtime);
+    now_time     = min(mtime);
     
     % iterating simulation
-        
-    idx = find(mtime==-1&Mstate==TRANSMIT);                                 % ID of successed transmission
-
-    if length(idx) > 0                              
-        Spnum = Spnum + 1;
-        Splen = Splen + Mplen(idx);
-        Wtime = Wtime + now_time - mgtime(idx);
-        Mstate(idx) = STANDBY;
-        mgtime(idx) = now_time - Tint * log(1-rand);                        % time of next packet's generation
-        mtime(idx) = (fix(mgtime(idx)/slot)+1)*slot;                        % time of next packet's sending
-    end
-
-    idx = find(mtime==-1&Mstate==COLLISION);                                % ID of failed transmission
-    if length(idx) > 0
-        Mstate(idx) = STANDBY;
-        mtime(idx) = now_time - Rint*log(1-rand(1,length(idx)));
-        mtime(idx) = (fix(mtime(idx)/slot)+1)*slot;
-    end
-
-    idx = find(mtime==-1);
-    if length(idx) > 0
-        Mstate(idx) = TRANSMIT;
-        mtime(idx) = now_time + Mplen(idx)/Srate;                           % time of finishing packet transmission
-        mtime(idx) = round(mtime(idx)/slot)*slot;
-        Tplen = Tplen + sum(Mplen(idx));
-    end
-    now_time = min(mtime);
-        
-    while 1
-        idx = find(mtime==now_time&Mstate==TRANSMIT);                       % ID of successed transmission
+    while 1    
+        idx = find(mtime==-1&Mstate==TRANSMIT);                                 % ID of successed transmission
 
         if length(idx) > 0                              
             Spnum = Spnum + 1;
             Splen = Splen + Mplen(idx);
             Wtime = Wtime + now_time - mgtime(idx);
             Mstate(idx) = STANDBY;
-            mgtime(idx) = now_time - Tint * log(1-rand);                   
-            mtime(idx) = (fix(mgtime(idx)/slot)+1)*slot;                    
+            mgtime(idx) = now_time - Tint * log(1-rand);                        % time of next generation
+            mtime(idx) = (fix(mgtime(idx)/slot)+1)*slot;                        % time of next sending
         end
 
-        idx = find(mtime==now_time&Mstate==COLLISION);                      
+        idx = find(mtime==now_time&Mstate==COLLISION);                                % ID of failed transmission
         if length(idx) > 0
             Mstate(idx) = STANDBY;
             mtime(idx) = now_time - Rint*log(1-rand(1,length(idx)));
             mtime(idx) = (fix(mtime(idx)/slot)+1)*slot;
         end
 
-        idx = find(mtime==-1);
+        idx = find(mtime==now_time);
         if length(idx) > 0
             Mstate(idx) = TRANSMIT;
-            mtime(idx) = now_time + Mplen(idx)/Srate;                       % time of finishing packet transmission
+            mtime(idx) = now_time + Mplen(idx)/Srate;                           % time of finishing packet transmission
             mtime(idx) = round(mtime(idx)/slot)*slot;
             Tplen = Tplen + sum(Mplen(idx));
         end
-        next_time = min(mtime);
         
-        if Spnum >= TOTAL                                                   % if sent packets over 10000, finish
+        if Spnum >= TOTAL
             break
         end
+
         
         idx = find(Mstate==TRANSMIT|Mstate==COLLISION);                     % terminals of transmit or collison
         if capture == 0                                                     % without capture effect
@@ -150,13 +122,14 @@ for indx = 1 :length(G)
                 end
             end
         end
-        now_time = next_time;                                               % time advance until the next state change time
+        now_time = min(mtime);                                               % time advance until the next state change time
     end
     
     
     Traffic(idnx) = Tplen / Srate / now_time;
-    S(idnx) = Traffic .* exp(-Traffic);
-    Delay(idnx) = Wtime/TOTAL*srate/plen;
+    T = Traffic(indx)
+    S(idnx) = Splen / Srate / now_time;
+    Delay(idnx) = Wtime / TOTAL * Srate / plen;
     
 end
 
