@@ -15,7 +15,7 @@ TOTAL = 10000;
 
 
 % define channel
-brate = 512e3;                                                              % bit rate
+brate = 128e3;                                                              % bit rate
 Srate = 2*10^3;                                                             % symbol rate
 Plen  = 7*8;                                                                % packet length
 Ttime = Plen/Srate;
